@@ -1,4 +1,4 @@
-const { User, Thought, Reaction } = require('../models');
+const { User, Thought } = require('../models');
 
 //* These are for /api/thoughts
 
@@ -86,7 +86,7 @@ module.exports = {
       const thought = await Thought.findOneAndDelete({ _id: req.params.thoughtId })
 
       if (!thought) {
-        res.status(404).json({ message: "Thought doesn't exist with that ID"})
+        res.status(404).json({ message: "No Thought found with that ID"})
       }
 
       res.json({ message: "Thought deleted!" });
@@ -99,7 +99,43 @@ module.exports = {
 
 //* These are for /api/thoughts/:thoughId/reactions
 //TODO: POST a create reaction stored in a single thought's reaching array field
+  async createReaction(req, res) {
+    console.log("You are adding a reaction");
+    console.log(req.body);
+    try {
+      const thought = await Thought.findOneAndUpdate(
+        { _id: req.params.thoughtId },
+        { $addToSet: { reactions: req.body }},
+        { runValidators: true, new: true }
+      );
+      
+      if (!thought) {
+        return res.status(404).json({ message: "No thought found with that ID"})
+      }
+      res.json(thought);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json(err);
+    }
+  },
 
 //TODO: DELETE to pull and remove a reaction by the reaction's reactionId value
 
-}
+  async removeReaction(req, res) {
+    try {
+      const thought = await Thought.findOneAndUpdate(
+        { _id: req.params.thoughtId },
+        { $pull: { reactions: { reactionId: req.params.reactionid }}},
+        { runValidators: true, new: true}
+      );
+
+      if (!thought){
+        return res.status(404).json({ message: "No thought found with that ID"});
+      }
+      res.json(thought);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
+};

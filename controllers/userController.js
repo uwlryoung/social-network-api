@@ -69,7 +69,7 @@ module.exports = {
       res.json({
         user
         // friends: await friends(req.params.userId), // Not Necessary because we are populating it
-        // Add thoughts as well
+        // Add thoughts as well -- JK probably not necessary because we are populating it under user as well
       });
 
     } catch (err) {
@@ -122,6 +122,14 @@ module.exports = {
         return res.status(404).json({ message: "No such user exists" });
       }
 
+      //? BONUS: Remove a user's associated thoughts when deleted
+      const thoughts = await Thought.findOneAndUpdate(
+        { username: req.params.username },
+        { $pull: { username: req.params.username }},
+        { new: true }
+      );
+      //? Above is the BONUS and if it doesn't work this time, it's ok.
+
       res.json({ message: "User successfully deleted" });
     } catch (err){
       console.log(err);
@@ -130,7 +138,6 @@ module.exports = {
   },
 
 
-  //? BONUS: Remove a user's associated thoughts when deleted
 
   //* These are all for /api/:userId/friends/:friendId
 
