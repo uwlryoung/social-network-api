@@ -97,7 +97,7 @@ module.exports = {
   },
 
 
-//* These are for /api/thoughts/:thoughId/reactions
+//* These are for /api/thoughts/:thoughtId/reactions
 //TODO: POST a create reaction stored in a single thought's reaching array field
   async createReaction(req, res) {
     console.log("You are adding a reaction");
@@ -105,7 +105,7 @@ module.exports = {
     try {
       const thought = await Thought.findOneAndUpdate(
         { _id: req.params.thoughtId },
-        { $addToSet: { reactions: req.body }},
+        { $addToSet: { reactions: req.body }}, // maybe this should be $push?
         { runValidators: true, new: true }
       );
       
