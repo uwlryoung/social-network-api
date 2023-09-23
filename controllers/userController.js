@@ -110,7 +110,7 @@ module.exports = {
       console.log(err);
       return res.status(500).json(err);
     }
-  };
+  },
 
   
   // TODO: DELETE (remove) a user by its _id
