@@ -1,3 +1,4 @@
+// const { ObjectId } = require('mongoose').Types;
 const { Schema, model } = require('mongoose');
 // const reactionSchema = require('./Reaction');
 // const thoughtSchema = require('./Thought');
@@ -24,8 +25,8 @@ const userSchema = new Schema(
         }
       }
     },
-    thoughts: [{ type: Schema.Types.ObjectId, ref: 'Thought' }],
-    friends: [{ type: Schema.Types.ObjectId, ref: 'User' }] 
+    thoughts: [{ type: Schema.Types.ObjectId, ref: 'thought' }],
+    friends: [{ type: Schema.Types.ObjectId, ref: 'user' }] 
   },
   {
     toJSON: {
@@ -35,8 +36,12 @@ const userSchema = new Schema(
 );
 
 userSchema.virtual('friendCount').get(function () {
-  return this.friends.length;
-})
+  if (this.friends){
+    return this.friends.length;
+  } else {
+    return 0;
+  }
+});
 
 const User = model('user', userSchema);
 

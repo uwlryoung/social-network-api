@@ -50,7 +50,7 @@ module.exports = {
         { $push: {thoughts: thought}},
         { runValidators: true, new: true }
       );
-      res.json(course);
+      res.json(thought);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);

@@ -8,28 +8,6 @@ const userCount = async () => {
   return numberOfUsers;
 };
 
-// const friendCount = async (userId) => {
-//   User.aggregate([
-//     { $match: {_id: new ObjectId(userId)}}
-
-//   ])
-// }
-
-// Below won't be necessary with .populate()
-// const friendList = async (userId) => {
-//   User.aggregate([
-//     { $match: {_id: new ObjectId(userId)}},
-//     { $unwind: '$friends'},
-//     {
-//       $group: {
-//         _id: new ObjectId(userId),
-//         friends: friends,
-//       },
-//     },
-//   ]);
-// };
-
-
 // * These are all for /api/users
 // TODO: GET All Users
 
@@ -45,7 +23,7 @@ module.exports = {
         userCount: await userCount(),
       };
 
-      res.JSON(userObj);
+      res.json(userObj);
 
     } catch (err) {
       console.log(err);
@@ -53,9 +31,7 @@ module.exports = {
     }
   },
 
-
   // TODO: GET a single user by its _id and populate thought and friend data
-
   async getSingleUser(req, res) {
     try {
       const user = await User.findOne({_id: req.params.userId})
@@ -66,11 +42,7 @@ module.exports = {
         return res.status(404).json({ message: "No such user exists" });
       }
       
-      res.json({
-        user
-        // friends: await friends(req.params.userId), // Not Necessary because we are populating it
-        // Add thoughts as well -- JK probably not necessary because we are populating it under user as well
-      });
+      res.json({user});
 
     } catch (err) {
       console.log(err);
@@ -137,8 +109,6 @@ module.exports = {
     }
   },
 
-
-
   //* These are all for /api/:userId/friends/:friendId
 
   // TODO: POST (create) to add a new friend to a user's friend list
@@ -150,7 +120,7 @@ module.exports = {
     try {
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $addToSet: { friends: req.body }}, 
+        { $addToSet: { friends: req.params.friendId }}, 
         { runValidators: true, new: true }
       );
 
