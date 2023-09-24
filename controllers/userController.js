@@ -66,7 +66,7 @@ module.exports = {
     }
   },
 
-  // TODO: PUT (update) a user by its _id
+  // PUT (update) a user by its _id
   // What exactly should we update here? 
   async updateUser(req, res) {
     try {
@@ -78,6 +78,7 @@ module.exports = {
         },
         { new: true }
       );
+      res.json(user);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
@@ -85,7 +86,7 @@ module.exports = {
   },
 
   
-  // TODO: DELETE (remove) a user by its _id
+  // DELETE (removes) a user by its _id
   async deleteUser(req, res) {
     try {
       const user = await User.findOneAndRemove({ _id: req.params.userId });
@@ -94,10 +95,11 @@ module.exports = {
         return res.status(404).json({ message: "No such user exists" });
       }
 
+      //! Need help working on this part: How to remove a thought once a user has been deleted
       //? BONUS: Remove a user's associated thoughts when deleted
       const thoughts = await Thought.findOneAndUpdate(
-        { username: req.params.username },
-        { $pull: { username: req.params.username }},
+        { _id: req.params.userId },
+        { $pull: { thoughts }}, // thoughts isn't correct but putting in a placeholder
         { new: true }
       );
       //? Above is the BONUS and if it doesn't work this time, it's ok.
@@ -110,25 +112,35 @@ module.exports = {
   },
 
   //* These are all for /api/:userId/friends/:friendId
-
-  // TODO: POST (create) to add a new friend to a user's friend list
-
+  // POST (Create) Friend. Adds both users to each other's list immediately
   async addFriend(req, res) {
-    console.log("You are adding a friend");
-    console.log(req.body);
-
     try {
+      if (req.params.userId === req.params.friendId) {
+        return res.status(400).json({ message: "You cannot add a user as a friend to themself." });
+      }
+
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $addToSet: { friends: req.params.friendId }}, 
+        { $push: { friends: req.params.friendId }}, 
         { runValidators: true, new: true }
+      );
+
+      const friend = await User.findOneAndUpdate(
+        { _id: req.params.friendId},
+        { $push: { friends: req.params.userId }},
+        { runValidators: true, new: true}
       );
 
       if (!user) {
         return res.status(404).json({ message: "No such user exists" });
       }
+
+      if (!friend) {
+        return res.status(404).json({ message: "No such fiend exists"})
+      }
       
       res.json(user); 
+      res.json(friend);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
