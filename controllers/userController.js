@@ -95,16 +95,14 @@ module.exports = {
         return res.status(404).json({ message: "No such user exists" });
       }
 
-      //! Need help working on this part: How to remove a thought once a user has been deleted
       //? BONUS: Remove a user's associated thoughts when deleted
-      const thoughts = await Thought.findOneAndUpdate(
-        { _id: req.params.userId },
-        { $pull: { thoughts }}, // thoughts isn't correct but putting in a placeholder
+      const thoughts = await Thought.deleteMany(
+        { username: user.username },
         { new: true }
       );
       //? Above is the BONUS and if it doesn't work this time, it's ok.
 
-      res.json({ message: "User successfully deleted" });
+      res.json({ message: "User successfully deleted and associated thoughts (if any)" });
     } catch (err){
       console.log(err);
       return res.status(500).json(err);

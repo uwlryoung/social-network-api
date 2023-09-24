@@ -40,17 +40,21 @@ module.exports = {
   //*   "userId": "5edff358a0fcb779aa7b118b"
   //* }
 
-  //! Question for tutoring: How can we make it so that below, the username and userId must match.
-  //! Right now, you can put in a user
   async createThought(req, res) {
     try {
+      const user = await User.findOne(
+        { _id: req.body.userId, username: req.body.username },
+      )
+      if(!user){
+        return res.json({ message: "User not found!"})
+      }
+      
       const thought = await Thought.create(req.body);
-      await User.findOneAndUpdate(
-        { _id: req.body.userId },
-        { $push: { thoughts: thought._id } },
-        { runValidators: true, new: true }
-      ).select('-__v');
-      res.json(thought);
+      // console.log(user);
+      user.thoughts.push(thought._id);
+      user.save();
+  
+      res.json({user, thought});
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
