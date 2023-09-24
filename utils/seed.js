@@ -166,39 +166,10 @@ connection.once('open', async () => {
       await connection.dropCollection('thoughts');
     }
 
-
-  // // Create empty array to hold the students
-  // const students = [];
-
-  // // Loop 20 times -- add students to the students array
-  // for (let i = 0; i < 20; i++) {
-  //   // Get some random assignment objects using a helper function that we imported from ./data
-  //   const assignments = getRandomAssignments(20);
-
-  //   const fullName = getRandomName();
-  //   const first = fullName.split(' ')[0];
-  //   const last = fullName.split(' ')[1];
-  //   const github = `${first}${Math.floor(Math.random() * (99 - 18 + 1) + 18)}`;
-
-  //   students.push({
-  //     first,
-  //     last,
-  //     github,
-  //     assignments,
-  //   });
-  // }
-
   // Add users to the collection and await the results
   await User.collection.insertMany(users);
 
   await Thought.collection.insertMany(thoughts);
-
-  // Add courses to the collection and await the results
-  // await Course.collection.insertOne({
-  //   courseName: 'UCLA',
-  //   inPerson: false,
-  //   students: [...students],
-  // });
 
   // Log out the seed data to indicate what should appear in the database
   console.table(users);
@@ -208,46 +179,3 @@ connection.once('open', async () => {
 });
 
 
-// const users = [
-//   {
-//       username: "CoolCat123",
-//       email: "john.doe@example.com",
-//       thoughts: [
-//         {
-//             thoughtText: "This is a random thought #1.",
-//             createdAt: new Date().toISOString().split("T")[0],
-//             username: "CoolCat123"
-//         },
-//         {
-//             thoughtText: "Just thinking about life and stuff...",
-//             createdAt: new Date().toISOString().split("T")[0],
-//             username: "CoolCat123"
-//         },
-//       ],
-//       friends: ["FoodieGuru67","MusicManiac55", "GamerGirl27" ]
-//   },
-// ];
-
-
-
-// // Get a random item given an array
-// const getRandomArrItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
-// // Gets a random full name
-// const getRandomName = () =>
-//   `${getRandomArrItem(names)} ${getRandomArrItem(names)}`;
-
-// // Function to generate random assignments that we can add to student object.
-// const getRandomAssignments = (int) => {
-//   const results = [];
-//   for (let i = 0; i < int; i++) {
-//     results.push({
-//       assignmentName: getRandomArrItem(appDescriptions),
-//       score: Math.floor(Math.random() * (99 - 70 + 1) + 70),
-//     });
-//   }
-//   return results;
-// };
-
-// // Export the functions for use in seed.js
-// module.exports = { getRandomName, getRandomAssignments };
