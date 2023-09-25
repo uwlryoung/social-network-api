@@ -1,7 +1,4 @@
-// const { ObjectId } = require('mongoose').Types;
 const { Schema, model } = require('mongoose');
-// const reactionSchema = require('./Reaction');
-// const thoughtSchema = require('./Thought');
 
 //Schema to create User model
 const userSchema = new Schema(
@@ -11,7 +8,7 @@ const userSchema = new Schema(
       unique: true,
       required: true,
       trim: true,
-      lowercase: true // not in readme, but I think it's a good idea
+      lowercase: true 
     },
     email: {
       type: String,

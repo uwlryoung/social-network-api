@@ -1,4 +1,3 @@
-const { ObjectId } = require('mongoose').Types;
 const { User, Thought } = require('../models');
 
 //* Add any aggegate functions needed here: 
@@ -8,10 +7,9 @@ const userCount = async () => {
   return numberOfUsers;
 };
 
-// * These are all for /api/users
-// TODO: GET All Users
-
 module.exports = {
+  //* The following fuctions use the routes /api/users/
+  // Gets all Users; Route: api/users
   async getUsers(req, res) {
     try {
       const users = await User.find()
@@ -31,7 +29,19 @@ module.exports = {
     }
   },
 
-  // TODO: GET a single user by its _id and populate thought and friend data
+  // Creates a new user
+  async createUser(req, res) {
+    try {
+      const user = await User.create(req.body);
+      res.json(user);
+    } catch (err){
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
+
+  //* The following fuctions use the routes /api/users/:userID
+  // Gets a single user by its _id and populates thought and friend data
   async getSingleUser(req, res) {
     try {
       const user = await User.findOne({_id: req.params.userId})
@@ -50,24 +60,7 @@ module.exports = {
     }
   },
 
-  // TODO: POST (create) a new user Example: 
-    //* {
-    //*   "username": "lernantino",
-    //*   "email": "lernantino@gmail.com"
-    //* }
-
-  async createUser(req, res) {
-    try {
-      const user = await User.create(req.body);
-      res.json(user);
-    } catch (err){
-      console.log(err);
-      return res.status(500).json(err);
-    }
-  },
-
-  // PUT (update) a user by its _id
-  // What exactly should we update here? 
+  // Updates a user's username and email
   async updateUser(req, res) {
     try {
       const user = await User.findOneAndUpdate(
@@ -85,8 +78,7 @@ module.exports = {
     }
   },
 
-  
-  // DELETE (removes) a user by its _id
+  // Deletes a user by its _id and removes any associated thoughts
   async deleteUser(req, res) {
     try {
       const user = await User.findOneAndRemove({ _id: req.params.userId });
@@ -95,12 +87,10 @@ module.exports = {
         return res.status(404).json({ message: "No such user exists" });
       }
 
-      //? BONUS: Remove a user's associated thoughts when deleted
       const thoughts = await Thought.deleteMany(
         { username: user.username },
         { new: true }
       );
-      //? Above is the BONUS and if it doesn't work this time, it's ok.
 
       res.json({ message: "User successfully deleted and associated thoughts (if any)" });
     } catch (err){
@@ -109,8 +99,8 @@ module.exports = {
     }
   },
 
-  //* These are all for /api/:userId/friends/:friendId
-  // POST (Create) Friend. Adds both users to each other's list immediately
+  //* The following fuctions use the routes /api/users/:userId/friends/:friendId
+  // Adds two users as friends
   async addFriend(req, res) {
     try {
       if (req.params.userId === req.params.friendId) {
@@ -131,27 +121,31 @@ module.exports = {
 
       if (!user) {
         return res.status(404).json({ message: "No such user exists" });
-      }
+      };
 
       if (!friend) {
         return res.status(404).json({ message: "No such fiend exists"})
-      }
+      };
       
-      res.json(user); 
-      res.json(friend);
+      res.json({user, friend}); 
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
     }
   },
 
-  // TODO: DELETE (remove) a friend from a user's friend list
-
+  // Removes friends from each others' friend list
   async removeFriend(req, res) {
     try {
       const user = await User.findOneAndUpdate(
         { _id: req.params.userId },
-        { $pull: { friends: { friendId: req.params.friendId }}},
+        { $pull: { friends: req.params.friendId}},
+        { runValidators: true, new: true}
+      );
+
+      const friend = await User.findOneAndUpdate(
+        { _id: req.params.friendId},
+        { $pull: { friends: req.params.userId }},
         { runValidators: true, new: true}
       );
 
@@ -159,7 +153,11 @@ module.exports = {
         return res.status(404).json({ message: "No such user exists" });
       };
 
-      res.json(user);
+      if (!friend) {
+        return res.status(404).json({ message: "No such fiend exists"})
+      };
+
+      res.json({ message: "Users successfully removed from each other's friend lists."});
     } catch (err) {
       console.log(err);
       res.status(500).json(err);

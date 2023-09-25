@@ -1,9 +1,8 @@
 const { User, Thought } = require('../models');
 
-//* These are for /api/thoughts
-
 module.exports = {
-//TODO: GET all thoughts
+  //* The following fuctions use the routes /api/thoughts
+  // Gets all thoughts
   async getThoughts(req, res) {
     try {
       const thoughts = await Thought.find().select('-__v');
@@ -14,8 +13,29 @@ module.exports = {
     }
   },
 
-//TODO: GET a single thought by its _id
+  // Creates a new thought 
+  async createThought(req, res) {
+    try {
+      const user = await User.findOne(
+        { _id: req.body.userId, username: req.body.username },
+      )
+      if(!user){
+        return res.json({ message: "User not found!"})
+      }
+      
+      const thought = await Thought.create(req.body);
+      user.thoughts.push(thought._id);
+      user.save();
+  
+      res.json({user, thought});
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
 
+  //* The following fuctions use the routes /api/thoughts/:thoughtId
+  // Gets a single thought by its _id
   async getSingleThought(req, res) {
     try {
       const thought = await Thought.findOne({ _id: req.params.thoughtId }).select('-__v');
@@ -31,38 +51,7 @@ module.exports = {
     }
   },
 
-//TODO: POST (create) a new thought 
-// ! Don't forget to push the created thoughts _id to the associated user's thoughts array field
-//* Example Data: 
-  //* {
-  //*   "thoughtText": "Here's a cool thought...",
-  //*   "username": "lernantino",
-  //*   "userId": "5edff358a0fcb779aa7b118b"
-  //* }
-
-  async createThought(req, res) {
-    try {
-      const user = await User.findOne(
-        { _id: req.body.userId, username: req.body.username },
-      )
-      if(!user){
-        return res.json({ message: "User not found!"})
-      }
-      
-      const thought = await Thought.create(req.body);
-      // console.log(user);
-      user.thoughts.push(thought._id);
-      user.save();
-  
-      res.json({user, thought});
-    } catch (err) {
-      console.log(err);
-      return res.status(500).json(err);
-    }
-  },
-
-//TODO: PUT (update) a thought by its _id
-
+// Updates a thought by its _id
   async updateThought(req, res) {
     try {
       const thought = await Thought.findOneAndUpdate(
@@ -71,8 +60,6 @@ module.exports = {
         { runValidators: true, new: true }
       );
 
-      // Maybe I don't need this? I think new: true above makes it so that 
-      // if it doesn't exist, it will add it as a new thought. 
       if (!thought){
         res.status(404).json({ message: "Thought doesn't exist with that ID"})
       }
@@ -84,7 +71,7 @@ module.exports = {
     }
   },
 
-//TODO: DELETE (remove) a thought by its _id
+// Deletes a thought by its _id
   async deleteThought(req, res) {
     try {
       const thought = await Thought.findOneAndDelete({ _id: req.params.thoughtId })
@@ -101,8 +88,8 @@ module.exports = {
   },
 
 
-//* These are for /api/thoughts/:thoughtId/reactions
-//TODO: POST a create reaction stored in a single thought's reaching array field
+//* The following fuctions use the routes /api/thoughts/:thoughtId/reactions
+// Creates a reaction to single thought
   async createReaction(req, res) {
     console.log("You are adding a reaction");
     console.log(req.body);
@@ -129,14 +116,15 @@ module.exports = {
     try {
       const thought = await Thought.findOneAndUpdate(
         { _id: req.params.thoughtId },
-        { $pull: { reactions: { reactionId: req.params.reactionid }}},
-        { runValidators: true, new: true}
+        { $pull: { reactions: { reactionId: req.body._id }}},
+        { runValidators: true, new: true }
       );
 
       if (!thought){
-        return res.status(404).json({ message: "No thought found with that ID"});
+        return res.status(404).json({ message: "No thought found with that ID" });
       }
-      res.json(thought);
+
+      res.json({ message: "Reaction Successfully removed from thought", thought });
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);
