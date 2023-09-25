@@ -91,12 +91,10 @@ module.exports = {
 //* The following fuctions use the routes /api/thoughts/:thoughtId/reactions
 // Creates a reaction to single thought
   async createReaction(req, res) {
-    console.log("You are adding a reaction");
-    console.log(req.body);
     try {
       const thought = await Thought.findOneAndUpdate(
         { _id: req.params.thoughtId },
-        { $addToSet: { reactions: req.body }}, // maybe this should be $push?
+        { $addToSet: { reactions: req.body }},
         { runValidators: true, new: true }
       );
       
@@ -110,13 +108,12 @@ module.exports = {
     }
   },
 
-//TODO: DELETE to pull and remove a reaction by the reaction's reactionId value
-
+// Deletes a thought's reaction by reactionId
   async removeReaction(req, res) {
     try {
       const thought = await Thought.findOneAndUpdate(
         { _id: req.params.thoughtId },
-        { $pull: { reactions: { reactionId: req.body._id }}},
+        { $pull: { reactions: { reactionId: req.body.reactionId }}},
         { runValidators: true, new: true }
       );
 

@@ -1,6 +1,7 @@
 const { Schema, model } = require('mongoose');
 const reactionSchema = require('./Reaction');
 
+// Schema to create Thought model
 const thoughtSchema = new Schema(
   {
     thoughtText: {
@@ -13,7 +14,7 @@ const thoughtSchema = new Schema(
       type: Date,
       // default: Date.now(),
       get: (date) => {
-        if (date) return date.toISOString().split("T") [0];
+        if (date) return date.toISOString().split("T")[0];
       },
     },
     username: {
